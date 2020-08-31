@@ -8,7 +8,7 @@ const Items = (props) => {
     <ul>
       {
         props.items.map(
-          (item,i) => <Item {...item} onClickShoppingList={props.onClickShoppingList(i)} key={i}/>
+          (item) => <Item {...item} onClickShoppingList={props.onClickShoppingList(item.id)} key={item.id}/>
         )
       }
     </ul>

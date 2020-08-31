@@ -3,9 +3,15 @@ export const all = (items)=>{
 }
 
 export const active = (items) =>{
-  return items.filter( item => item.finished );
+  return items.filter( item => !item.finished );
 }
 
 export const completed = (items)=>{
-  return items.filter( item => !item.finished );
+  return items.filter( item => item.finished );
+}
+
+export const TYPE = {
+  ACTIVE:'active',
+  ALL:'all',
+  COMPLETED:'completed'
 }

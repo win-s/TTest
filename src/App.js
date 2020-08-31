@@ -3,22 +3,23 @@ import React, { useState } from 'react';
 import Items from './list/items/Items';
 import AddShoppingListForm from './addShoppingList/AddShoppingListForm'
 import ShoppingListFilter from './shoppingListFilter/ShoppingListFilter';
-import { all,active,completed } from './shoppingListFilter/filterService/FilterService';
+import * as filterService from './shoppingListFilter/filterService/FilterService';
 
 const App = () => {
-  const [filteredShoppingList,setFilteredShoppingList] = useState([]);
+
   const [data,setData] = useState([]);
+  const [filter,setFilter] = useState(filterService.TYPE.ALL);
   const [shoppingName,setShoppingName] = useState('');
   
 
   const onFilterAll = ()=>{
-    setFilteredShoppingList( all(data) );
+    setFilter(filterService.TYPE.ALL);
   }
   const onFilterActive = ()=>{
-    setFilteredShoppingList( active(data) );
+    setFilter(filterService.TYPE.ACTIVE)
   }
   const onFilterComplete = ()=>{
-    setFilteredShoppingList( completed(data) );
+    setFilter(filterService.TYPE.COMPLETED);
   }
   const onShoppingValueChange = (e)=>{
     setShoppingName(e.target.value);
@@ -30,15 +31,17 @@ const App = () => {
       ...data,
       {
         label: shoppingName,
-        finished: false
+        finished: false,
+        id: Math.floor(Math.random()*1000)
       }
     ]);
     setShoppingName('');
+    onFilterAll();
   }
 
   const onClickShoppingList = index => () =>{
-    setData(data.map((item,i)=>{
-      return i === index ? {
+    setData(data.map((item)=>{
+      return index === item.id ? {
         label: item.label,
         finished: !item.finished
       }: item;
@@ -53,7 +56,7 @@ const App = () => {
         onAddShoppingList={onAddShoppingList}
       />
       <Items 
-        items={filteredShoppingList}
+        items={filterService[filter](data)}
         onClickShoppingList={onClickShoppingList}
       />
       <ShoppingListFilter
