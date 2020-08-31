@@ -3,7 +3,7 @@ import React from 'react'
 import Item from '../item/Item'
 
 const Items = (props) => {
-  console.log(props);
+  console.log('Items',props);
   return (
     <ul>
       {

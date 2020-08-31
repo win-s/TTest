@@ -1,62 +1,95 @@
 import React, { useState } from 'react';
 
 import Items from './list/items/Items';
-import AddShoppingListForm from './addShoppingList/AddShoppingListForm'
+import AddShoppingListForm from './addShoppingList/AddShoppingListForm';
 import ShoppingListFilter from './shoppingListFilter/ShoppingListFilter';
+import History from './history/History';
+
 import * as filterService from './shoppingListFilter/filterService/FilterService';
+
+const history = [];
 
 const App = () => {
 
-  const [data,setData] = useState([]);
-  const [filter,setFilter] = useState(filterService.TYPE.ALL);
-  const [shoppingName,setShoppingName] = useState('');
+  const [appData,setAppData] = useState({
+    shoppingList: [],
+    shoppingName: '',
+    filter: filterService.TYPE.ALL
+  })
   
 
   const onFilterAll = ()=>{
-    setFilter(filterService.TYPE.ALL);
+    setAppData({
+      ...appData,
+      filter: filterService.TYPE.ALL
+    })
   }
   const onFilterActive = ()=>{
-    setFilter(filterService.TYPE.ACTIVE)
+    setAppData({
+      ...appData,
+      filter: filterService.TYPE.ACTIVE
+    })
   }
   const onFilterComplete = ()=>{
-    setFilter(filterService.TYPE.COMPLETED);
+    setAppData({
+      ...appData,
+      filter: filterService.TYPE.COMPLETED
+    })
   }
   const onShoppingValueChange = (e)=>{
-    setShoppingName(e.target.value);
+    setAppData({
+      ...appData,
+      shoppingName: e.target.value
+    });
     
   }
 
   const onAddShoppingList =()=>{
-    setData([
-      ...data,
+    const shoppingList = [
+      ...appData.shoppingList,
       {
-        label: shoppingName,
+        label: appData.shoppingName,
         finished: false,
         id: Math.floor(Math.random()*1000)
       }
-    ]);
-    setShoppingName('');
-    onFilterAll();
+    ];
+    const shoppingName = '';
+
+    setAppData({
+      shoppingList,
+      shoppingName,
+      filter:filterService.TYPE.ALL
+    });
   }
 
-  const onClickShoppingList = index => () =>{
-    setData(data.map((item)=>{
-      return index === item.id ? {
+  const onClickShoppingList = id => () =>{
+    
+    const shoppingList = appData.shoppingList.map((item)=>{
+      return id === item.id ? {
         label: item.label,
-        finished: !item.finished
+        finished: !item.finished,
+        id: item.id
       }: item;
-    }));
+    });
+    setAppData({
+      ...appData,
+      shoppingList
+    })
   }
+  const onUndo = ()=>{
+
+  }
+  const onRedo = ()=>{}
 
   return (
     <div>
       <AddShoppingListForm
-        shoppingName={shoppingName}
+        shoppingName={appData.shoppingName}
         onValueChange={onShoppingValueChange}
         onAddShoppingList={onAddShoppingList}
       />
       <Items 
-        items={filterService[filter](data)}
+        items={filterService[appData.filter](appData.shoppingList)}
         onClickShoppingList={onClickShoppingList}
       />
       <ShoppingListFilter
@@ -64,6 +97,10 @@ const App = () => {
         onFilterActive={onFilterActive}
         onFilterComplete={onFilterComplete}
       ></ShoppingListFilter>
+      <History
+        onUndo={onUndo}
+        onRedo={onRedo}
+      ></History>
     </div>
     
   )
