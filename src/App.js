@@ -1,26 +1,69 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
 
-function App() {
+import Items from './list/items/Items';
+import AddShoppingListForm from './addShoppingList/AddShoppingListForm'
+import ShoppingListFilter from './shoppingListFilter/ShoppingListFilter';
+import { all,active,completed } from './shoppingListFilter/filterService/FilterService';
+
+const App = () => {
+  const [filteredShoppingList,setFilteredShoppingList] = useState([]);
+  const [data,setData] = useState([]);
+  const [shoppingName,setShoppingName] = useState('');
+  
+
+  const onFilterAll = ()=>{
+    setFilteredShoppingList( all(data) );
+  }
+  const onFilterActive = ()=>{
+    setFilteredShoppingList( active(data) );
+  }
+  const onFilterComplete = ()=>{
+    setFilteredShoppingList( completed(data) );
+  }
+  const onShoppingValueChange = (e)=>{
+    setShoppingName(e.target.value);
+    
+  }
+
+  const onAddShoppingList =()=>{
+    setData([
+      ...data,
+      {
+        label: shoppingName,
+        finished: false
+      }
+    ]);
+    setShoppingName('');
+  }
+
+  const onClickShoppingList = index => () =>{
+    setData(data.map((item,i)=>{
+      return i === index ? {
+        label: item.label,
+        finished: !item.finished
+      }: item;
+    }));
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <AddShoppingListForm
+        shoppingName={shoppingName}
+        onValueChange={onShoppingValueChange}
+        onAddShoppingList={onAddShoppingList}
+      />
+      <Items 
+        items={filteredShoppingList}
+        onClickShoppingList={onClickShoppingList}
+      />
+      <ShoppingListFilter
+        onFilterAll={onFilterAll}
+        onFilterActive={onFilterActive}
+        onFilterComplete={onFilterComplete}
+      ></ShoppingListFilter>
     </div>
-  );
+    
+  )
 }
 
-export default App;
+export default App
