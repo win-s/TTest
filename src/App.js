@@ -1,108 +1,53 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react'
+import ShoppingApp from './shoppingApp/shoppingApp'
+import { TYPE } from './shoppingApp/shoppingListFilter/filterService/FilterService'
 
-import Items from './list/items/Items';
-import AddShoppingListForm from './addShoppingList/AddShoppingListForm';
-import ShoppingListFilter from './shoppingListFilter/ShoppingListFilter';
-import History from './history/History';
+import History from './history/History'
+import { addHistory, getAppState, getNextAppIndex, getPreviousAppIndex} from './history/HistoryService';
 
-import * as filterService from './shoppingListFilter/filterService/FilterService';
-
-const history = [];
+const initialAppState = {
+  shoppingList: [],
+  shoppingName: '',
+  filter: TYPE.ALL
+}
 
 const App = () => {
 
-  const [appData,setAppData] = useState({
-    shoppingList: [],
-    shoppingName: '',
-    filter: filterService.TYPE.ALL
+  const [history,setHistory] = useState({
+    data: [initialAppState],
+    currentIndex: 0
   })
-  
 
-  const onFilterAll = ()=>{
-    setAppData({
-      ...appData,
-      filter: filterService.TYPE.ALL
-    })
-  }
-  const onFilterActive = ()=>{
-    setAppData({
-      ...appData,
-      filter: filterService.TYPE.ACTIVE
-    })
-  }
-  const onFilterComplete = ()=>{
-    setAppData({
-      ...appData,
-      filter: filterService.TYPE.COMPLETED
-    })
-  }
-  const onShoppingValueChange = (e)=>{
-    setAppData({
-      ...appData,
-      shoppingName: e.target.value
-    });
-    
-  }
-
-  const onAddShoppingList =()=>{
-    const shoppingList = [
-      ...appData.shoppingList,
-      {
-        label: appData.shoppingName,
-        finished: false,
-        id: Math.floor(Math.random()*1000)
-      }
-    ];
-    const shoppingName = '';
-
-    setAppData({
-      shoppingList,
-      shoppingName,
-      filter:filterService.TYPE.ALL
-    });
-  }
-
-  const onClickShoppingList = id => () =>{
-    
-    const shoppingList = appData.shoppingList.map((item)=>{
-      return id === item.id ? {
-        label: item.label,
-        finished: !item.finished,
-        id: item.id
-      }: item;
-    });
-    setAppData({
-      ...appData,
-      shoppingList
-    })
-  }
   const onUndo = ()=>{
-
+    const previousIndex = getPreviousAppIndex(history)
+    setHistory({
+      data: history.data,
+      currentIndex: previousIndex
+    })
   }
-  const onRedo = ()=>{}
+  const onRedo = ()=>{
+    const nextIndex = getNextAppIndex(history)
+    setHistory({
+      data: history.data,
+      currentIndex: nextIndex
+    })
+  }
+  const onShoppingAppChange = (newState)=>{
+    setHistory(addHistory(history,newState))
+  }
 
   return (
     <div>
-      <AddShoppingListForm
-        shoppingName={appData.shoppingName}
-        onValueChange={onShoppingValueChange}
-        onAddShoppingList={onAddShoppingList}
-      />
-      <Items 
-        items={filterService[appData.filter](appData.shoppingList)}
-        onClickShoppingList={onClickShoppingList}
-      />
-      <ShoppingListFilter
-        onFilterAll={onFilterAll}
-        onFilterActive={onFilterActive}
-        onFilterComplete={onFilterComplete}
-      ></ShoppingListFilter>
+      <ShoppingApp
+        onShoppingAppStateChange={onShoppingAppChange}
+        shoppingAppState={getAppState(history)}
+      >
+      </ShoppingApp>
       <History
         onUndo={onUndo}
         onRedo={onRedo}
       ></History>
     </div>
-    
   )
 }
 
